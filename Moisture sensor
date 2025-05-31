@@ -1,0 +1,54 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+const int moistureSensor = A0;
+const int relay = 7;
+const int led = 9;
+const int buzzer = 10;
+const int dryValue = 500;
+const int wetValue = 200;
+
+void setup() {
+  lcd.init();
+  lcd.backlight();
+  pinMode(relay, OUTPUT);
+  pinMode(led, OUTPUT);
+  pinMode(buzzer, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  int moistureValue = analogRead(moistureSensor);
+  Serial.print("Moisture Value: ");
+  Serial.println(moistureValue);
+
+  lcd.setCursor(0, 0);
+  lcd.print("Moisture: ");
+  lcd.setCursor(0, 1);
+  lcd.print(moistureValue);
+
+  if (moistureValue < dryValue) {
+    Serial.println("Soil is dry");
+    lcd.setCursor(8, 1);
+    lcd.print("Dry");
+    digitalWrite(relay, HIGH); // Turn on relay
+    digitalWrite(led, HIGH); // Turn on LED
+    digitalWrite(buzzer, HIGH); // Turn on buzzer
+  } else if (moistureValue > wetValue) {
+    Serial.println("Soil is wet");
+    lcd.setCursor(8, 1);
+    lcd.print("Wet");
+    digitalWrite(relay, LOW); // Turn off relay
+    digitalWrite(led, LOW); // Turn off LED
+    digitalWrite(buzzer, LOW); // Turn off buzzer
+  } else {
+    Serial.println("Soil is moist");
+    lcd.setCursor(8, 1);
+    lcd.print("Moist");
+    // Add logic for moist soil condition
+  }
+
+  delay(1000); // Read every 1 sec
+}
